@@ -146,10 +146,57 @@ about half the time.
 
 ---
 
-## Pending
+## D-011 · Push channel: WhatsApp via Meta's official Cloud API
+*2026-10-18 · Accepted · Owner: user · Build in Phase 2*
 
-### P-001 · Push channel for the brief
-*Needed by Phase 2*
+**Context.** After the HTML/Markdown brief, we need one push channel to the user's phone. I compared
+Telegram, email and Google Calendar and recommended **Telegram** (least setup, easy to host).
+The table is kept below as originally written. **The user chose WhatsApp**, the app they already
+check every morning. A notification only helps if it lands where you already look, and that
+outweighs setup cost. So I researched how to do WhatsApp properly (2026-10-18).
+
+**WhatsApp options considered**
+
+| Option | How | Verdict |
+|---|---|---|
+| **Meta WhatsApp Cloud API** (official) | Meta developer app + business portfolio. Messages go out from a business number. `POST https://graph.facebook.com/v23.0/<PHONE_NUMBER_ID>/messages` with a Bearer token | **Chosen** |
+| CallMeBot | Free personal-use bot: a GET request with an apikey | Rejected: sign-ups currently closed ("the bot is currently full"), unofficial, no SLA, and a third party sees every message |
+| Unofficial WhatsApp Web libraries (Baileys, whatsapp-web.js) | Automate your own logged-in account | Rejected: against WhatsApp's terms, and puts your personal number at risk of a ban |
+| Twilio WhatsApp | Official provider (BSP) on top of Meta | Rejected for v1: same Meta rules and fees, plus Twilio's markup and another account |
+
+**What the official API means for the product (from Meta's docs)**
+- **Sender:** messages come from a business number, not from yourself. A number already active on
+  WhatsApp *can't* be registered ("Numbers already in use with WhatsApp cannot be registered unless
+  they are deleted first"). Start with the **test number Meta generates** during setup. Move to a
+  dedicated number when hosting.
+- **Templates:** a daily brief is a business-initiated message, so it must use a **pre-approved
+  template** unless the user has messaged the bot in the last 24 h (the "customer service window").
+  ⇒ Saans needs a **utility template** with a few variables. This is a useful product constraint:
+  it forces the brief into about 5 one-line answers (workout · windows · commute · stubble · headline AQI).
+  The full brief stays in the HTML file (and on the site link, once hosted).
+- **Cost:** per-message pricing since 2025-07-01. Utility templates are charged only when delivered
+  *outside* an open window, and are free inside one. Third-party sources put India's utility rate at
+  about ₹0.115 per message (≈ ₹3.5/month for one daily brief). Not yet confirmed against Meta's INR rate card.
+- **Token:** the dashboard's temporary token "expires quickly". Saans needs a **system-user
+  token** (permissions `whatsapp_business_messaging`, `whatsapp_business_management`,
+  `business_management`) stored in `.env`.
+- **Later upgrade:** once hosted with a webhook, the user can reply "brief" to open a 24 h window, and
+  replies become free-form and free. Out of scope until the project is online.
+
+**Design.** Delivery is an adapter (`saans/delivery/whatsapp.py` behind a `Notifier` interface), so
+Telegram, email or Calendar can be added without touching plan logic. Tests mock the Graph API
+with recorded or synthetic responses. A failed send never fails the run, and the brief file is always written.
+
+**What the user will need to do (Phase 2, steps verified then):** create a Meta developer account →
+create an app with the WhatsApp product and a business portfolio → add their phone as a recipient of
+the test number → create a system user and generate a token → submit the `saans_daily_brief` utility
+template for approval. `.env`: `WHATSAPP_TOKEN`, `WHATSAPP_PHONE_NUMBER_ID`, `WHATSAPP_TO`.
+
+**Risks / revisit if.** Meta tightens use of test numbers, the template is rejected (Meta may reject a
+template that's all variables, so the template needs fixed wording around them), or costs change.
+Fallback order: email, then Telegram.
+
+<details><summary>Original comparison (Telegram recommended)</summary>
 
 | | Telegram bot | Email | Google Calendar events |
 |---|---|---|---|
@@ -160,5 +207,4 @@ about half the time.
 | Moves online | Trivially (one HTTPS call) | Easy | Needs token refresh handled on the server |
 | Cost | Free | Free | Free |
 
-**Recommendation:** Telegram, because it's the least setup, most glanceable, and easiest to host
-later. Calendar is the most interesting product-wise and could come later as a second channel.
+</details>

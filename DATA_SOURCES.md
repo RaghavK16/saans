@@ -204,5 +204,6 @@ Status legend: ✅ called successfully · 🔑 needs a key (endpoint confirmed, 
 | NASA FIRMS MAP_KEY | Phase 1 | `FIRMS_MAP_KEY` |
 | OpenAQ API key | Phase 2 | `OPENAQ_API_KEY` |
 | WAQI token | Phase 2 | `WAQI_TOKEN` |
+| WhatsApp Cloud API token + phone number ID (delivery, not data; see DECISIONS.md D-011) | Phase 2 | `WHATSAPP_TOKEN`, `WHATSAPP_PHONE_NUMBER_ID`, `WHATSAPP_TO` |
 
-All four are free. Saans skips a source and warns if its key is missing. It never crashes.
+The four data keys are free. WhatsApp costs a few rupees a month (D-011). Saans skips a source and warns if its key is missing. It never crashes.

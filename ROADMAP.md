@@ -65,11 +65,11 @@ Goal: from your first `saans run`, store everything we'll ever need. Minimal bri
     any 3 days a week, so this is a cheap, high-value suggestion.
 - Add the OpenAQ collector (station concentrations with history, which also backfills missed
   days) and the WAQI collector.
-- **Push channel:** build the one you pick (see DECISIONS.md, P-001).
+- **Push channel:** WhatsApp via Meta's Cloud API: a utility template carrying a 5-line summary (D-011).
 
 **Done when:** the brief answers "train outside? when to air out the house? when to leave and
 when to recirculate? which days to go in?", each with a reason, and scenario tests (clean day,
-smog day, mixed day, missing data) pass.
+smog day, mixed day, missing data) pass. The 5-line summary arrives on WhatsApp after `saans run`.
 
 ## Phase 3: Stubble-fire early warning (heuristic v1)
 Built before the scorecard because peak burning season (roughly late Oct to mid Nov) is now,
