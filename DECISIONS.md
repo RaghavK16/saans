@@ -146,29 +146,6 @@ about half the time.
 
 ---
 
-## D-012 · How Saans computes NAQI where the CPCB table leaves gaps
-*2026-10-18 · Accepted*
-
-**Context.** CPCB's 2014 NAQI table gives integer concentration ranges (e.g. PM2.5 0–30, 31–60),
-an open-ended Severe band ("250+"), and the rules (at least 3 pollutants including PM2.5 or PM10,
-at least 16 h of data, the highest sub-index wins). The breakpoints were cross-checked on 2026-10-18
-against two independent reproductions of the CPCB table (ies.gov.in Arthapedia, and the CPCB 2014
-table as cited by PMC). The official CPCB PDF host wasn't reachable.
-**Gaps and our choices.**
-- *Between bands* (e.g. PM2.5 = 30.6): round concentrations half-up to the table's precision
-  (integers; 1 decimal for CO and Pb) before lookup. Rejected: a continuous interpolation that
-  ignores the integer edges, which gives values up to ~2 points off CPCB near band edges.
-- *Severe band upper limit:* extrapolate with the width of the Very Poor band (PM2.5: 251→380 maps
-  to 401→500), then cap at 500. Rejected: the US-EPA-style 500 ceiling at arbitrary concentrations.
-- *8 h coverage for CO/O₃:* require at least 6 of 8 hours (CPCB only states the 16-of-24 rule).
-- *Rolling 8 h for CO/O₃:* the mean of the last 8 hours. CPCB's dashboard may instead use the maximum
-  8 h mean over the day. **To verify** against the CPCB dashboard in Phase 4. It only affects the
-  official mode.
-**Why.** Agreeing with the bulletin matters more than mathematical neatness. Each assumption is
-isolated in `saans/naqi.py` and pinned by a test.
-**Revisit if.** The scorecard shows a systematic offset between our computed city NAQI and the
-CPCB bulletin.
-
 ## D-011 · Push channel: WhatsApp via Meta's official Cloud API
 *2026-10-18 · Accepted · Owner: user · Build in Phase 2*
 
@@ -231,3 +208,26 @@ Fallback order: email, then Telegram.
 | Cost | Free | Free | Free |
 
 </details>
+
+## D-012 · How Saans computes NAQI where the CPCB table leaves gaps
+*2026-10-18 · Accepted*
+
+**Context.** CPCB's 2014 NAQI table gives integer concentration ranges (e.g. PM2.5 0–30, 31–60),
+an open-ended Severe band ("250+"), and the rules (at least 3 pollutants including PM2.5 or PM10,
+at least 16 h of data, the highest sub-index wins). The breakpoints were cross-checked on 2026-10-18
+against two independent reproductions of the CPCB table (ies.gov.in Arthapedia, and the CPCB 2014
+table as cited by PMC). The official CPCB PDF host wasn't reachable.
+**Gaps and our choices.**
+- *Between bands* (e.g. PM2.5 = 30.6): round concentrations half-up to the table's precision
+  (integers; 1 decimal for CO and Pb) before lookup. Rejected: a continuous interpolation that
+  ignores the integer edges, which gives values up to ~2 points off CPCB near band edges.
+- *Severe band upper limit:* extrapolate with the width of the Very Poor band (PM2.5: 251→380 maps
+  to 401→500), then cap at 500. Rejected: the US-EPA-style 500 ceiling at arbitrary concentrations.
+- *8 h coverage for CO/O₃:* require at least 6 of 8 hours (CPCB only states the 16-of-24 rule).
+- *Rolling 8 h for CO/O₃:* the mean of the last 8 hours. CPCB's dashboard may instead use the maximum
+  8 h mean over the day. **To verify** against the CPCB dashboard in Phase 4. It only affects the
+  official mode.
+**Why.** Agreeing with the bulletin matters more than mathematical neatness. Each assumption is
+isolated in `saans/naqi.py` and pinned by a test.
+**Revisit if.** The scorecard shows a systematic offset between our computed city NAQI and the
+CPCB bulletin.

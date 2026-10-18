@@ -73,6 +73,8 @@ CREATE TABLE weather_forecast_hourly (
     valid_at        TEXT NOT NULL,
     wind_speed_kmh  REAL,
     wind_dir_deg    REAL,
+    wind_speed_850_kmh REAL,               -- ~1.5 km up: closer to smoke-transport height
+    wind_dir_850_deg   REAL,
     blh_m           REAL,                  -- boundary layer height
     temperature_c   REAL,
     PRIMARY KEY (raw_id, location_key, valid_at)
