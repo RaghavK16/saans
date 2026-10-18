@@ -1,0 +1,226 @@
+{
+    "index_name": "3b01bcb8-0b14-4abf-b6f2-c1bfd384ba69",
+    "title": "Real time Air Quality Index from various locations",
+    "desc": "Real time Air Quality Index from various locations",
+    "org_type": "Central",
+    "org": [
+        "Ministry of Environment, Forest and Climate Change",
+        "Central Pollution Control Board"
+    ],
+    "sector": [
+        "Environment and Forest",
+        "Industrial Air Pollution",
+        "Residential Air Pollution",
+        "Vehicular Air Pollution"
+    ],
+    "source": "data.gov.in",
+    "catalog_uuid": "a3e7afc6-b799-4ede-b143-8e074b27e062",
+    "visualizable": "1",
+    "active": "1",
+    "created": 1470249000,
+    "updated": 1792321544,
+    "created_date": "2016-04-08T00:00:00Z",
+    "updated_date": "2026-10-18T11:05:44Z",
+    "external_ws": 0,
+    "external_ws_url": "",
+    "target_bucket": {
+        "index": "air_quality",
+        "type": "3b01bcb8-0b14-4abf-b6f2-c1bfd384ba69"
+    },
+    "field": [
+        {
+            "name": "country",
+            "id": "country",
+            "type": "keyword"
+        },
+        {
+            "name": "state",
+            "id": "state",
+            "type": "keyword"
+        },
+        {
+            "name": "city",
+            "id": "city",
+            "type": "keyword"
+        },
+        {
+            "name": "station",
+            "id": "station",
+            "type": "keyword"
+        },
+        {
+            "name": "last_update",
+            "id": "last_update",
+            "type": "keyword"
+        },
+        {
+            "name": "latitude",
+            "id": "latitude",
+            "type": "keyword"
+        },
+        {
+            "name": "longitude",
+            "id": "longitude",
+            "type": "keyword"
+        },
+        {
+            "name": "pollutant_id",
+            "id": "pollutant_id",
+            "type": "keyword"
+        },
+        {
+            "name": "pollutant_min",
+            "id": "min_value",
+            "type": "keyword"
+        },
+        {
+            "name": "pollutant_max",
+            "id": "max_value",
+            "type": "keyword"
+        },
+        {
+            "name": "pollutant_avg",
+            "id": "avg_value",
+            "type": "keyword"
+        }
+    ],
+    "message": "Resource lists",
+    "version": "2.2.0",
+    "status": "ok",
+    "total": 28,
+    "count": 10,
+    "limit": "10",
+    "offset": "0",
+    "records": [
+        {
+            "country": "India",
+            "state": "Uttar Pradesh",
+            "city": "Noida",
+            "station": "Sector-1, Noida - UPPCB",
+            "last_update": "18-10-2026 16:00:00",
+            "latitude": "28.5898",
+            "longitude": "77.3101",
+            "pollutant_id": "PM2.5",
+            "min_value": "49",
+            "max_value": "209",
+            "avg_value": "140"
+        },
+        {
+            "country": "India",
+            "state": "Uttar Pradesh",
+            "city": "Noida",
+            "station": "Sector-1, Noida - UPPCB",
+            "last_update": "18-10-2026 16:00:00",
+            "latitude": "28.5898",
+            "longitude": "77.3101",
+            "pollutant_id": "OZONE",
+            "min_value": "14",
+            "max_value": "68",
+            "avg_value": "49"
+        },
+        {
+            "country": "India",
+            "state": "Uttar Pradesh",
+            "city": "Noida",
+            "station": "Sector - 62, Noida - IITM",
+            "last_update": "18-10-2026 16:00:00",
+            "latitude": "28.6245479",
+            "longitude": "77.3577104",
+            "pollutant_id": "NH3",
+            "min_value": "NA",
+            "max_value": "NA",
+            "avg_value": "NA"
+        },
+        {
+            "country": "India",
+            "state": "Uttar Pradesh",
+            "city": "Noida",
+            "station": "Sector - 62, Noida - IITM",
+            "last_update": "18-10-2026 16:00:00",
+            "latitude": "28.6245479",
+            "longitude": "77.3577104",
+            "pollutant_id": "CO",
+            "min_value": "1",
+            "max_value": "46",
+            "avg_value": "19"
+        },
+        {
+            "country": "India",
+            "state": "Uttar Pradesh",
+            "city": "Noida",
+            "station": "Sector-116, Noida - UPPCB",
+            "last_update": "18-10-2026 16:00:00",
+            "latitude": "28.56923",
+            "longitude": "77.393848",
+            "pollutant_id": "PM10",
+            "min_value": "72",
+            "max_value": "178",
+            "avg_value": "122"
+        },
+        {
+            "country": "India",
+            "state": "Uttar Pradesh",
+            "city": "Noida",
+            "station": "Sector-116, Noida - UPPCB",
+            "last_update": "18-10-2026 16:00:00",
+            "latitude": "28.56923",
+            "longitude": "77.393848",
+            "pollutant_id": "CO",
+            "min_value": "10",
+            "max_value": "80",
+            "avg_value": "29"
+        },
+        {
+            "country": "India",
+            "state": "Uttar Pradesh",
+            "city": "Noida",
+            "station": "Sector - 125, Noida - UPPCB",
+            "last_update": "18-10-2026 16:00:00",
+            "latitude": "28.5447608",
+            "longitude": "77.3231257",
+            "pollutant_id": "PM10",
+            "min_value": "66",
+            "max_value": "221",
+            "avg_value": "131"
+        },
+        {
+            "country": "India",
+            "state": "Uttar Pradesh",
+            "city": "Noida",
+            "station": "Sector - 125, Noida - UPPCB",
+            "last_update": "18-10-2026 16:00:00",
+            "latitude": "28.5447608",
+            "longitude": "77.3231257",
+            "pollutant_id": "NO2",
+            "min_value": "9",
+            "max_value": "83",
+            "avg_value": "45"
+        },
+        {
+            "country": "India",
+            "state": "Uttar Pradesh",
+            "city": "Noida",
+            "station": "Sector - 125, Noida - UPPCB",
+            "last_update": "18-10-2026 16:00:00",
+            "latitude": "28.5447608",
+            "longitude": "77.3231257",
+            "pollutant_id": "NH3",
+            "min_value": "6",
+            "max_value": "16",
+            "avg_value": "11"
+        },
+        {
+            "country": "India",
+            "state": "Uttar Pradesh",
+            "city": "Noida",
+            "station": "Sector-116, Noida - UPPCB",
+            "last_update": "18-10-2026 16:00:00",
+            "latitude": "28.56923",
+            "longitude": "77.393848",
+            "pollutant_id": "PM2.5",
+            "min_value": "48",
+            "max_value": "198",
+            "avg_value": "119"
+        }
+    ]
+}

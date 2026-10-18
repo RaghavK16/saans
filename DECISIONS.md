@@ -231,3 +231,20 @@ table as cited by PMC). The official CPCB PDF host wasn't reachable.
 isolated in `saans/naqi.py` and pinned by a test.
 **Revisit if.** The scorecard shows a systematic offset between our computed city NAQI and the
 CPCB bulletin.
+
+## D-013 · FIRMS works without a key, using NASA's public regional files
+*2026-10-18 · Accepted*
+
+**Context.** We planned on the FIRMS area API, which needs a MAP_KEY. While checking the CSV format
+I found that NASA also publishes South Asia files covering the last 24 h, 48 h and 7 d, with no key
+and the same columns.
+**Options.** (a) Key only. (b) Public files only. (c) Public files by default, the area API when a
+key is present.
+**Decision.** (c). With no key: fetch the 48 h file (7 d after a gap of more than 40 h) for each VIIRS
+satellite and filter to the bbox at parse time. With a key: the area API for the exact bbox,
+re-fetching from the last successful day in chunks of 5 days or fewer.
+**Why.** Fire data starts accumulating today instead of waiting on a sign-up, during the stubble
+season itself. Manual runs (D-003) can miss up to 7 days with no loss. The key still matters for
+history (the 2025 backtest in Phase 3).
+**Cost.** About 1.5 MB of raw data per run when no key is set (whole-region files). Acceptable.
+

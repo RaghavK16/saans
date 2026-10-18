@@ -1,0 +1,226 @@
+{
+    "index_name": "3b01bcb8-0b14-4abf-b6f2-c1bfd384ba69",
+    "title": "Real time Air Quality Index from various locations",
+    "desc": "Real time Air Quality Index from various locations",
+    "org_type": "Central",
+    "org": [
+        "Ministry of Environment, Forest and Climate Change",
+        "Central Pollution Control Board"
+    ],
+    "sector": [
+        "Environment and Forest",
+        "Industrial Air Pollution",
+        "Residential Air Pollution",
+        "Vehicular Air Pollution"
+    ],
+    "source": "data.gov.in",
+    "catalog_uuid": "a3e7afc6-b799-4ede-b143-8e074b27e062",
+    "visualizable": "1",
+    "active": "1",
+    "created": 1470249000,
+    "updated": 1792263875,
+    "created_date": "2016-04-08T00:00:00Z",
+    "updated_date": "2026-10-17T19:04:35Z",
+    "external_ws": 0,
+    "external_ws_url": "",
+    "target_bucket": {
+        "index": "air_quality",
+        "type": "3b01bcb8-0b14-4abf-b6f2-c1bfd384ba69"
+    },
+    "field": [
+        {
+            "name": "country",
+            "id": "country",
+            "type": "keyword"
+        },
+        {
+            "name": "state",
+            "id": "state",
+            "type": "keyword"
+        },
+        {
+            "name": "city",
+            "id": "city",
+            "type": "keyword"
+        },
+        {
+            "name": "station",
+            "id": "station",
+            "type": "keyword"
+        },
+        {
+            "name": "last_update",
+            "id": "last_update",
+            "type": "keyword"
+        },
+        {
+            "name": "latitude",
+            "id": "latitude",
+            "type": "keyword"
+        },
+        {
+            "name": "longitude",
+            "id": "longitude",
+            "type": "keyword"
+        },
+        {
+            "name": "pollutant_id",
+            "id": "pollutant_id",
+            "type": "keyword"
+        },
+        {
+            "name": "pollutant_min",
+            "id": "min_value",
+            "type": "keyword"
+        },
+        {
+            "name": "pollutant_max",
+            "id": "max_value",
+            "type": "keyword"
+        },
+        {
+            "name": "pollutant_avg",
+            "id": "avg_value",
+            "type": "keyword"
+        }
+    ],
+    "message": "Resource lists",
+    "version": "2.2.0",
+    "status": "ok",
+    "total": 406,
+    "count": 10,
+    "limit": "10",
+    "offset": "0",
+    "records": [
+        {
+            "country": "India",
+            "state": "Delhi",
+            "city": "Delhi",
+            "station": "Cantonment Area, Delhi - DPCC",
+            "last_update": "18-10-2026 00:00:00",
+            "latitude": "28.594169",
+            "longitude": "77.1251",
+            "pollutant_id": "NO2",
+            "min_value": "18",
+            "max_value": "50",
+            "avg_value": "34"
+        },
+        {
+            "country": "India",
+            "state": "Delhi",
+            "city": "Delhi",
+            "station": "Burari,Delhi-DPCC",
+            "last_update": "18-10-2026 00:00:00",
+            "latitude": "28.769667",
+            "longitude": "77.206805",
+            "pollutant_id": "OZONE",
+            "min_value": "7",
+            "max_value": "60",
+            "avg_value": "28"
+        },
+        {
+            "country": "India",
+            "state": "Delhi",
+            "city": "Delhi",
+            "station": "Narela, Delhi - DPCC",
+            "last_update": "18-10-2026 00:00:00",
+            "latitude": "28.822836",
+            "longitude": "77.101981",
+            "pollutant_id": "PM2.5",
+            "min_value": "123",
+            "max_value": "335",
+            "avg_value": "226"
+        },
+        {
+            "country": "India",
+            "state": "Delhi",
+            "city": "Delhi",
+            "station": "Narela, Delhi - DPCC",
+            "last_update": "18-10-2026 00:00:00",
+            "latitude": "28.822836",
+            "longitude": "77.101981",
+            "pollutant_id": "OZONE",
+            "min_value": "10",
+            "max_value": "22",
+            "avg_value": "18"
+        },
+        {
+            "country": "India",
+            "state": "Delhi",
+            "city": "Delhi",
+            "station": "Tikri Kalan ,Delhi-DPCC",
+            "last_update": "18-10-2026 00:00:00",
+            "latitude": "28.67518",
+            "longitude": "76.980506",
+            "pollutant_id": "NH3",
+            "min_value": "5",
+            "max_value": "5",
+            "avg_value": "5"
+        },
+        {
+            "country": "India",
+            "state": "Delhi",
+            "city": "Delhi",
+            "station": "Tikri Kalan ,Delhi-DPCC",
+            "last_update": "18-10-2026 00:00:00",
+            "latitude": "28.67518",
+            "longitude": "76.980506",
+            "pollutant_id": "SO2",
+            "min_value": "2",
+            "max_value": "16",
+            "avg_value": "5"
+        },
+        {
+            "country": "India",
+            "state": "Delhi",
+            "city": "Delhi",
+            "station": "Tikri Kalan ,Delhi-DPCC",
+            "last_update": "18-10-2026 00:00:00",
+            "latitude": "28.67518",
+            "longitude": "76.980506",
+            "pollutant_id": "OZONE",
+            "min_value": "11",
+            "max_value": "190",
+            "avg_value": "61"
+        },
+        {
+            "country": "India",
+            "state": "Delhi",
+            "city": "Delhi",
+            "station": "Ghummanhera ,Delhi-DPCC",
+            "last_update": "18-10-2026 00:00:00",
+            "latitude": "28.534762",
+            "longitude": "76.91609",
+            "pollutant_id": "PM2.5",
+            "min_value": "49",
+            "max_value": "96",
+            "avg_value": "66"
+        },
+        {
+            "country": "India",
+            "state": "Delhi",
+            "city": "Delhi",
+            "station": "Ghummanhera ,Delhi-DPCC",
+            "last_update": "18-10-2026 00:00:00",
+            "latitude": "28.534762",
+            "longitude": "76.91609",
+            "pollutant_id": "NH3",
+            "min_value": "7",
+            "max_value": "25",
+            "avg_value": "13"
+        },
+        {
+            "country": "India",
+            "state": "Delhi",
+            "city": "Delhi",
+            "station": "Ghummanhera ,Delhi-DPCC",
+            "last_update": "18-10-2026 00:00:00",
+            "latitude": "28.534762",
+            "longitude": "76.91609",
+            "pollutant_id": "SO2",
+            "min_value": "NA",
+            "max_value": "NA",
+            "avg_value": "NA"
+        }
+    ]
+}

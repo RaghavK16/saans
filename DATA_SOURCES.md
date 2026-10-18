@@ -12,7 +12,7 @@ Status legend: ✅ called successfully · 🔑 needs a key (endpoint confirmed, 
 | Open-Meteo Weather | Wind, boundary-layer height (Delhi + Punjab/Haryana) | No | ✅ | Forecast history: yes (Previous Runs API) |
 | CPCB via data.gov.in | Observed station readings, Delhi + Noida (latest snapshot) | Yes | ✅ with the public sample key | **No**: latest snapshot only |
 | CPCB daily AQI bulletin (PDF) | Official city-level daily AQI: the scorecard's ground truth | No | ✅ | **Yes**: past bulletins are fetchable by date (tested back to 2025-11-01) |
-| NASA FIRMS | Fire hotspots, Punjab + Haryana | Yes (MAP_KEY) | 🔑 | Yes, by date |
+| NASA FIRMS | Fire hotspots, Punjab + Haryana | Optional (MAP_KEY) | ✅ public files · 🔑 area API | Without a key: last 7 days. With a key: by date |
 | OpenAQ v3 | Observed hourly concentrations with history | Yes | 🔑 | Yes, likely (to verify once we have a key) |
 | WAQI / aqicn | Second observed feed + 3–8 day forecast | Yes (token) | 🔑 | **No** |
 | IITM AQEWS (ews.tropmet.res.in) | Official Delhi AQI category forecast | No | ⚠️ unreachable from your network | **No** |
@@ -126,7 +126,17 @@ Status legend: ✅ called successfully · 🔑 needs a key (endpoint confirmed, 
     hides some fires. A hotspot count is a proxy for how much is burning, not a measure of emissions.
   - The FIRMS docs say real-time data is replaced once the NRT version is processed.
 
-**How to get the key**
+- **No-key alternative (found 2026-10-18, tested):** NASA publishes regional CSVs covering the
+  last 24 h, 48 h and 7 d, with the same columns as the area API:
+  `https://firms.modaps.eosdis.nasa.gov/data/active_fire/{folder}/csv/{prefix}_VIIRS_C2_South_Asia_{24h|48h|7d}.csv`
+  with `suomi-npp-viirs-c2`/`SUOMI`, `noaa-20-viirs-c2`/`J1`, `noaa-21-viirs-c2`/`J2`.
+  Each file is 0.1–0.7 MB and covers all of South Asia, so we filter it to the bbox ourselves. On
+  2026-10-18 the NOAA-20 24 h file had 264 detections inside the Punjab/Haryana bbox.
+  Saans uses these when there's no key (D-013).
+- **Verified CSV header (VIIRS):** `latitude,longitude,bright_ti4,scan,track,acq_date,acq_time,satellite,confidence,version,bright_ti5,frp,daynight`.
+  `acq_time` is `HHMM` UTC. `confidence` is `low | nominal | high`. `satellite` is `N | N20 | N21`.
+
+**How to get the key** (optional: adds exact date ranges and history beyond 7 days)
 1. Go to https://firms.modaps.eosdis.nasa.gov/api/map_key/
 2. Click **Get MAP Key** and enter your email. The key arrives by email.
 3. Put it in `.env` as `FIRMS_MAP_KEY=…`. You can check your remaining transactions with
@@ -201,7 +211,7 @@ Status legend: ✅ called successfully · 🔑 needs a key (endpoint confirmed, 
 | Key | Needed for | `.env` variable |
 |---|---|---|
 | data.gov.in API key | Phase 1 | `DATAGOVIN_API_KEY` |
-| NASA FIRMS MAP_KEY | Phase 1 | `FIRMS_MAP_KEY` |
+| NASA FIRMS MAP_KEY (optional; works without it, D-013) | Phase 1 | `FIRMS_MAP_KEY` |
 | OpenAQ API key | Phase 2 | `OPENAQ_API_KEY` |
 | WAQI token | Phase 2 | `WAQI_TOKEN` |
 | WhatsApp Cloud API token + phone number ID (delivery, not data; see DECISIONS.md D-011) | Phase 2 | `WHATSAPP_TOKEN`, `WHATSAPP_PHONE_NUMBER_ID`, `WHATSAPP_TO` |
