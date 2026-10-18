@@ -35,6 +35,11 @@ Instant NAQI for timing decisions (workout, windows, commute), always labelled "
 **Why.** Each question needs a different number. Labelling them stops the brief from appearing
 to contradict the CPCB bulletin.
 **Revisit if.** The user finds two numbers confusing in practice.
+**Watch (2026-10-18, first real data).** Instant NAQI compares *one hour* of O₃ against breakpoints
+built for *8 h* averages. On the first forecast, midday ozone pushed instant NAQI to "Poor"
+(224–239) while the 24 h value was ~116. Before Phase 2 rules rely on instant NAQI, decide whether
+O₃/CO should use their 8 h rolling mean even in instant mode. CAMS is also known to overestimate
+ozone over the Indo-Gangetic plain, and the scorecard will tell us.
 
 ## D-003 · Manual runs for now, with no background schedule
 *2026-10-18 · Accepted · Owner: user*

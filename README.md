@@ -12,7 +12,19 @@ Uses India's CPCB NAQI scale throughout.
 - [DECISIONS.md](DECISIONS.md): product and technical decision log
 - [CLAUDE.md](CLAUDE.md): project conventions
 
-Status: Phase 0 (foundations). Not yet runnable.
+## Run it
+
+```bash
+python3 -m venv .venv && .venv/bin/pip install -e '.[dev]'
+cp .env.example .env            # optional keys; see DATA_SOURCES.md
+.venv/bin/saans run             # collect everything, write out/brief-YYYY-MM-DD.{md,html}
+```
+
+Other commands: `saans collect`, `saans brief`, `saans reparse` (rebuild parsed tables from the
+raw archive), `saans backfill cpcb_bulletin` (fetch the bulletin archive back to Oct 2025).
+Tests run fully offline: `.venv/bin/pytest`.
+
+Status: Phase 1 (collector + brief scaffold). Recommendations arrive in Phase 2.
 
 Data: Open-Meteo (CC BY 4.0), CAMS, CPCB, NASA FIRMS, OpenAQ, WAQI, IITM, credited as each is
 integrated.

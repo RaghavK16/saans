@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Saans · {{ b.day.strftime('%d %b %Y') }}</title>
+<style>
+  :root { --bg:#fbfaf7; --fg:#1d1d1b; --muted:#6b6a65; --line:#e4e1d9; --card:#fff; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#151514; --fg:#ecebe6; --muted:#a3a19a; --line:#33322e; --card:#1d1d1b; }
+  }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--fg); font:15px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+  main { max-width: 860px; margin: 0 auto; padding: 24px 16px 48px; }
+  h1 { font-size: 26px; margin: 0 0 4px; }
+  h2 { font-size: 18px; margin: 32px 0 8px; padding-top: 8px; border-top: 1px solid var(--line); }
+  h3 { font-size: 15px; margin: 20px 0 6px; }
+  .muted, figcaption { color: var(--muted); font-size: 13px; }
+  .note { background: #fff4d6; color:#5a4300; border-radius: 8px; padding: 8px 12px; margin: 12px 0; }
+  .wrap { overflow-x: auto; }
+  table { border-collapse: collapse; width: 100%; font-variant-numeric: tabular-nums; }
+  th, td { text-align: left; padding: 4px 8px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+  th { font-size: 12px; color: var(--muted); font-weight: 600; }
+  td.num, th.num { text-align: right; }
+  tr.plan td { font-weight: 600; }
+  .chip { display:inline-block; min-width: 2.6em; text-align:center; padding: 1px 8px; border-radius: 999px; font-weight:600; color:#111; }
+  /* CPCB NAQI colour convention */
+  .c-good { background:#4caf50; } .c-satisfactory { background:#a5d66b; } .c-moderate { background:#ffe14d; }
+  .c-poor { background:#ff9a3c; } .c-very-poor { background:#f2453d; color:#fff; } .c-severe { background:#9b1c1c; color:#fff; }
+  .c-none { background: var(--line); }
+  ul { padding-left: 20px; }
+</style>
+</head>
+<body>
+<main>
+<h1>Saans · {{ b.day.strftime('%a %d %b %Y') }}</h1>
+<p class="muted">Generated {{ b.generated_at_local.strftime('%H:%M') }} IST · CPCB NAQI ·
+<b>Instant</b> = one hour's forecast concentrations (for timing; not official) ·
+<b>24 h</b> = CPCB-style rolling average (comparable with the official bulletin) · forecast hours are UTC-aligned, so they fall at :30 IST</p>
+{% for note in b.notes %}<div class="note">{{ note }}</div>{% endfor %}
+
+<h2>Today's outlook</h2>
+{% for loc in b.locations %}
+<h3>{{ loc.point.name }}</h3>
+{% if loc.available %}{% set peak = loc.peak() %}
+<p class="muted">{% if peak %}Peak instant NAQI <span class="chip {{ peak.instant.category | cat_class }}">{{ peak.instant.value }}</span> {{ peak.instant.category }} at {{ peak.local_time.strftime('%H:%M') }} · {% endif %}
+Open-Meteo / CAMS, fetched {{ loc.issued_at | local_time }} IST · grid {{ '%.2f, %.2f' | format(*loc.grid) }}</p>
+<div class="wrap"><table>
+<tr><th>Hour</th><th class="num">Instant</th><th>Category</th><th>Main pollutant</th><th class="num">24 h</th><th>Your plan</th></tr>
+{% for h in loc.hours %}{% set label = h.local_time | slot_label(b.routine, loc.point.key) %}
+<tr{% if label %} class="plan"{% endif %}>
+  <td>{{ h.local_time.strftime('%H:%M') }}</td>
+  <td class="num"><span class="chip {{ h.instant.category | cat_class }}">{{ h.instant.value if h.instant.valid else '–' }}</span></td>
+  <td>{{ h.instant.category or '–' }}</td>
+  <td>{{ h.instant.prominent | join(', ') or '–' }}</td>
+  <td class="num">{{ h.official.value if h.official.valid else '–' }}</td>
+  <td>{{ label }}</td>
+</tr>{% endfor %}
+</table></div>
+{% else %}<p class="muted">No forecast stored for this location yet.</p>{% endif %}
+{% endfor %}
+{% if b.same_grid_cell %}<p class="note">Home and office fall in the same forecast grid cell, so the two tables can't differ meaningfully.</p>{% endif %}
+
+<h2>Latest observed: nearest CPCB stations</h2>
+{% for key, stations in b.observations.items() %}
+<h3>{{ key | title }}</h3>
+<ul>{% for s in stations %}
+<li>{{ s.station }} ({{ '%.1f' | format(s.distance_km) }} km): <span class="chip {{ (s.aqi | category_of) | cat_class }}">{{ s.aqi if s.aqi is not none else '–' }}</span>{% if s.prominent %} driven by {{ s.prominent }}{% endif %} <span class="muted">as of {{ s.observed_at_local.strftime('%d %b %H:%M') }}</span></li>
+{% else %}<li class="muted">No station data yet (needs DATAGOVIN_API_KEY).</li>{% endfor %}</ul>
+{% endfor %}
+<p class="muted">Station AQI = the highest pollutant sub-index CPCB reports for that station (provisional reading of the data.gov.in feed).</p>
+
+<h2>Stubble fires: Punjab + Haryana, last 24 h</h2>
+{% if b.fires_24h is none %}<p class="muted">No fire data stored yet.</p>
+{% elif not b.fires_24h %}<p>No detections in the last 24 h.</p>
+{% else %}
+<div class="wrap"><table>
+<tr><th>Satellite product</th><th class="num">Detections</th><th class="num">Total FRP (MW)</th></tr>
+{% for product, (count, frp) in b.fires_24h.items() %}<tr><td>{{ product }}</td><td class="num">{{ count }}</td><td class="num">{{ '%.0f' | format(frp) }}</td></tr>{% endfor %}
+</table></div>
+<p class="muted">Raw counts only. The early-warning heuristic (fires × wind × trapping) arrives in Phase 3.</p>
+{% endif %}
+
+<h2>Coming in Phase 2</h2>
+<ul>
+<li>Workout call for {{ b.routine.get('workout_slots', []) | join(' or ') }}: outdoors or gym</li>
+<li>When to run the purifier and when windows can open</li>
+<li>Commute: least-bad departure and when to recirculate</li>
+<li>Best {{ b.routine.get('office_days_per_week', 3) }} office days this week</li>
+</ul>
+
+<h2>Data health</h2>
+<div class="wrap"><table>
+<tr><th>Source</th><th>This run</th><th>Last successful fetch (IST)</th></tr>
+{% for h in b.health %}<tr><td>{{ h.source }}</td><td>{{ h.status }}{% if h.detail %} <span class="muted">{{ h.detail }}</span>{% endif %}</td><td>{{ h.last_ok | local_time if h.last_ok else 'never' }}</td></tr>{% endfor %}
+</table></div>
+<p class="muted">CPCB bulletins archived: {{ b.bulletins_stored }} days.{% if b.previous_run_gap %} Previous run was {{ b.previous_run_gap | human_gap }} before this one.{% endif %}</p>
+
+<p class="muted" style="margin-top:32px">Data: Open-Meteo (CC BY 4.0) with CAMS · CPCB via data.gov.in and cpcb.gov.in · NASA FIRMS.</p>
+</main>
+</body>
+</html>

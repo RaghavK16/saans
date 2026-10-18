@@ -1,0 +1,72 @@
+# Saans · {{ b.day.strftime('%a %d %b %Y') }}
+
+_Generated {{ b.generated_at_local.strftime('%H:%M') }} IST. All numbers use CPCB's NAQI.
+**Instant** = one hour's forecast concentrations (for timing decisions; not an official number).
+**24 h** = CPCB-style rolling average (comparable with the official bulletin).
+Forecast hours are UTC-aligned, so they fall at :30 IST._
+{% for note in b.notes %}
+> ⚠ {{ note }}
+{% endfor %}
+
+## Today's outlook
+{% for loc in b.locations %}
+### {{ loc.point.name }}
+{% if loc.available %}{% set peak = loc.peak() %}
+{% if peak %}Peak instant NAQI **{{ peak.instant.value }} · {{ peak.instant.category }}** at {{ peak.local_time.strftime('%H:%M') }} · {% endif %}forecast: Open-Meteo / CAMS, fetched {{ loc.issued_at | local_time }} IST, grid point {{ '%.2f, %.2f' | format(*loc.grid) }}
+
+| Hour | Instant | Category | Main pollutant | 24 h | Your plan |
+|---|---:|---|---|---:|---|
+{% for h in loc.hours -%}
+| {{ h.local_time.strftime('%H:%M') }} | {{ h.instant.value if h.instant.valid else '–' }} | {{ h.instant.category or '–' }} | {{ h.instant.prominent | join(', ') or '–' }} | {{ h.official.value if h.official.valid else '–' }} | {{ h.local_time | slot_label(b.routine, loc.point.key) }} |
+{% endfor %}
+{% else %}
+_No forecast stored for this location yet._
+{% endif %}
+{% endfor %}
+{% if b.same_grid_cell %}
+> Home and office fall in the same forecast grid cell, so the two tables can't differ meaningfully.
+{% endif %}
+
+## Latest observed (nearest CPCB stations)
+{% for key, stations in b.observations.items() %}
+**{{ key | title }}:**
+{% if stations %}{% for s in stations %}
+- {{ s.station }} ({{ '%.1f' | format(s.distance_km) }} km): AQI {{ s.aqi if s.aqi is not none else '–' }}{% if s.prominent %}, driven by {{ s.prominent }}{% endif %} · as of {{ s.observed_at_local.strftime('%d %b %H:%M') }}
+{% endfor %}{% else %}
+- _No station data yet (needs `DATAGOVIN_API_KEY`)._
+{% endif %}
+{% endfor %}
+_Station AQI = the highest pollutant sub-index CPCB reports for that station (provisional reading of the data.gov.in feed; DATA_SOURCES.md §3)._
+
+## Stubble fires: Punjab + Haryana, last 24 h
+{% if b.fires_24h is none %}
+_No fire data stored yet._
+{% elif not b.fires_24h %}
+No detections in the last 24 h.
+{% else %}
+| Satellite product | Detections | Total FRP (MW) |
+|---|---:|---:|
+{% for product, (count, frp) in b.fires_24h.items() -%}
+| {{ product }} | {{ count }} | {{ '%.0f' | format(frp) }} |
+{% endfor %}
+
+_Raw counts only. The early-warning heuristic (fires × wind × trapping) arrives in Phase 3._
+{% endif %}
+
+## Coming in Phase 2
+- Workout call for {{ b.routine.get('workout_slots', []) | join(' or ') }}: outdoors or gym
+- When to run the purifier and when windows can open
+- Commute: least-bad departure in {{ b.routine.get('depart_home_window', '') }} / {{ b.routine.get('depart_office_window', '') }}, and when to recirculate
+- Best {{ b.routine.get('office_days_per_week', 3) }} office days this week
+
+## Data health
+| Source | This run | Last successful fetch (IST) |
+|---|---|---|
+{% for h in b.health -%}
+| {{ h.source }} | {{ h.status }}{% if h.detail %}: {{ h.detail }}{% endif %} | {{ h.last_ok | local_time if h.last_ok else 'never' }} |
+{% endfor %}
+
+CPCB bulletins archived: {{ b.bulletins_stored }} days.{% if b.previous_run_gap %} Previous run was {{ b.previous_run_gap | human_gap }} before this one.{% endif %}
+
+---
+Data: Open-Meteo (CC BY 4.0) with CAMS · CPCB via data.gov.in and cpcb.gov.in · NASA FIRMS.
