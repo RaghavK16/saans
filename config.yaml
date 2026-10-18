@@ -1,0 +1,81 @@
+# Saans configuration. Committed to a PUBLIC repo: locality-level coordinates only
+# (2 decimals ≈ 1 km), never an address. Secrets live in .env (see .env.example).
+
+timezone: Asia/Kolkata
+
+storage:
+  data_dir: data   # SQLite DB + raw archive (gitignored)
+  out_dir: out     # generated briefs (gitignored)
+
+http:
+  timeout_seconds: 30
+  user_agent: "Saans/0.1 (personal air-quality planner; https://github.com/RaghavK16)"
+
+# Places the brief is about. `cpcb_city` matches the city name used by CPCB/data.gov.in.
+locations:
+  home:
+    name: Model Town, Delhi
+    lat: 28.72
+    lon: 77.19
+    cpcb_city: Delhi
+  office:
+    name: Noida (sector not set — edit me)   # TODO(user): set your office sector's lat/lon
+    lat: 28.57
+    lon: 77.32
+    cpcb_city: Noida
+
+# Default commute route (DECISIONS.md D-010). Points are sampled for route NAQI.
+route:
+  name: Model Town → ISBT Kashmere Gate → Ring Road (ITO) → DND → Noida
+  points:
+    - {key: isbt, name: ISBT Kashmere Gate, lat: 28.67, lon: 77.23}
+    - {key: ito, name: ITO, lat: 28.63, lon: 77.24}
+    - {key: dnd, name: DND Flyway, lat: 28.58, lon: 77.27}
+
+# Stubble-fire belt (Phase 3). bbox = west,south,east,north. Note: also covers Delhi and
+# parts of Rajasthan/Himachal; Phase 3 filters hotspots to state boundaries.
+fire_region:
+  name: Punjab + Haryana
+  bbox: [73.8, 27.6, 77.6, 32.6]
+
+# Points where we record wind/boundary-layer forecasts: the fire belt plus Delhi.
+wind_points:
+  - {key: amritsar, name: Amritsar, lat: 31.63, lon: 74.87}
+  - {key: bathinda, name: Bathinda, lat: 30.21, lon: 74.95}
+  - {key: ludhiana, name: Ludhiana, lat: 30.90, lon: 75.85}
+  - {key: patiala, name: Patiala, lat: 30.34, lon: 76.39}
+  - {key: hisar, name: Hisar, lat: 29.15, lon: 75.72}
+  - {key: karnal, name: Karnal, lat: 29.69, lon: 76.99}
+  - {key: delhi, name: Delhi, lat: 28.63, lon: 77.22}
+
+# Your routine (D-010). Used by the brief; recommendations arrive in Phase 2.
+routine:
+  workout_slots: ["08:00-09:00", "20:00-21:00"]
+  office_days_per_week: 3
+  office_hours: "11:00-17:00"
+  depart_home_window: "09:00-10:30"
+  depart_office_window: "16:30-18:30"
+
+# Instant-NAQI thresholds (D-010). Phase 2 rules read these.
+thresholds:
+  outdoor_ok_max: 100
+  outdoor_light_max: 150
+  windows_open_max: 100
+  recirculate_above: 100
+
+sources:
+  open_meteo_aq:
+    forecast_days: 5
+    past_days: 1
+  open_meteo_weather:
+    forecast_days: 3
+  cpcb_bulletin:
+    backfill_start: "2025-10-01"
+    max_per_run: 30          # newest first; `saans backfill cpcb_bulletin` does the rest
+    delay_seconds: 1.0       # be polite to cpcb.gov.in
+  datagovin:
+    cities: [Delhi, Noida]
+    page_size: 1000
+  firms:
+    products: [VIIRS_SNPP_NRT, VIIRS_NOAA20_NRT, VIIRS_NOAA21_NRT]
+    max_catchup_days: 10
