@@ -95,12 +95,12 @@ def recirculation(dep: Departure, threshold: float) -> str:
         return f"recirculate from {dep.samples[first].place} onward"
     if sum(bad) / len(bad) >= MOSTLY_BAD:
         clean = ", ".join(s.place for s, b in zip(dep.samples, bad) if not b)
-        return f"recirculate the whole way (cleaner only near {clean})"
+        return f"recirculate the whole way, cleaner only near {clean}"
     return "recirculate around " + ", ".join(s.place for s, b in zip(dep.samples, bad) if b)
 
 
-def _leg(name: str, route: list[Outlook], day: date, spec: str, minutes: int, threshold: float,
-         now: datetime) -> tuple[str | None, list[str]]:
+def _leg(name: str, verb: str, route: list[Outlook], day: date, spec: str, minutes: int,
+         threshold: float, now: datetime) -> tuple[str | None, list[str]]:
     _, end = window_on(day, spec, now.tzinfo)
     if end < now:
         return None, [f"{name}: window {spec} has passed"]
@@ -112,8 +112,8 @@ def _leg(name: str, route: list[Outlook], day: date, spec: str, minutes: int, th
     worst = max(scored, key=lambda d: d.score)
     flat = worst.score - best.score < MEANINGFUL_DIFF
     when = (f"any time {scored[0].leave:%H:%M}–{scored[-1].leave:%H:%M}" if flat and len(scored) > 1
-            else f"leave {best.leave:%H:%M}")
-    lines = [f"{name}: {when} (route NAQI ~{best.score:.0f}, peak {best.peak} "
+            else f"at {best.leave:%H:%M}")
+    lines = [f"{name}: leave {when} (route NAQI ~{best.score:.0f}, peak {best.peak} "
              f"at {next(s.place for s in best.samples if s.value == best.peak)}); {recirc}"]
     if flat and len(scored) > 1:
         lines.append(f"{name}: departure times within {MEANINGFUL_DIFF} NAQI points of each other; "
@@ -125,7 +125,7 @@ def _leg(name: str, route: list[Outlook], day: date, spec: str, minutes: int, th
     if recirc != "fresh-air mode is fine" and minutes > CO2_TIP_AFTER_MIN:
         lines.append(f"{name}: on recirculation for {minutes} min, let fresh air in for a minute "
                      "every 20–30 min (CO₂ builds up and makes you drowsy)")
-    summary = f"{when} (~{best.score:.0f}, {recirc})"
+    summary = f"{verb} {when} (~{best.score:.0f}, {recirc})"
     return summary, lines
 
 
@@ -141,11 +141,11 @@ def recommend_commute(home_to_office: list[Outlook], routine: dict, thresholds: 
         return Recommendation("commute", f"{title}: none (weekend)")
 
     office_to_home = list(reversed(home_to_office))
-    morning, m_lines = _leg("Morning", home_to_office, day, routine["depart_home_window"],
+    morning, m_lines = _leg("Morning", "leave", home_to_office, day, routine["depart_home_window"],
                             minutes, threshold, now)
-    evening, e_lines = _leg("Return", office_to_home, day, routine["depart_office_window"],
+    evening, e_lines = _leg("Return", "return", office_to_home, day, routine["depart_office_window"],
                             minutes, threshold, now)
-    parts = [p for p in (morning and f"{morning}", evening and f"return {evening}") if p]
+    parts = [p for p in (morning, evening) if p]
     if not parts:
         return Recommendation("commute", f"{title}: no forecast for your departure windows",
                               m_lines + e_lines, ok=False)

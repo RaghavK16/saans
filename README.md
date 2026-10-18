@@ -24,7 +24,7 @@ Other commands: `saans collect`, `saans brief`, `saans reparse` (rebuild parsed 
 raw archive), `saans backfill cpcb_bulletin` (fetch the bulletin archive back to Oct 2025).
 Tests run fully offline: `.venv/bin/pytest`.
 
-Status: Phase 1 (collector + brief scaffold). Recommendations arrive in Phase 2.
+Status: Phase 2a done. The daily brief now gives workout, purifier/windows, commute and office-day calls. Next: WhatsApp delivery and station-based route data (2b), then the stubble warning (Phase 3).
 
 Data: Open-Meteo (CC BY 4.0), CAMS, CPCB, NASA FIRMS, OpenAQ, WAQI, IITM, credited as each is
 integrated.

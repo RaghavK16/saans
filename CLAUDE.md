@@ -35,8 +35,9 @@ saans/            package
   db.py           connection + migrations
   raw.py          fetch → store raw → index row
   naqi.py         CPCB NAQI (pure, table-driven)
-  sources/        one module per source: fetch() + parse()
-  brief/          plan logic + Markdown/HTML rendering
+  sources/        one module per source: collect() + parse()
+  plan/           recommendation rules: pure functions over Outlooks, no I/O
+  brief/          assemble facts + plan, render Markdown/HTML
 tests/            mirrors saans/; fixtures/ holds recorded responses
 docs/             heuristic write-ups, backtests
 ops/              launchd template (not installed by default)
@@ -51,6 +52,8 @@ data/ out/        gitignored: DB, raw archive, generated briefs
 - Units: µg/m³ for everything except CO in mg/m³ (the NAQI convention). Convert at parse time and name
   the columns with units (`pm25_ugm3`).
 - Every recommendation in the brief carries a human-readable reason with the numbers that drove it.
+- Rules (`saans/plan/`) never read the DB or the clock: they take Outlooks and `now`. Test them
+  with the synthetic builders in `tests/plan_helpers.py` (clean / smog / mixed / no-data scenarios).
 - Small increments; each one runs and passes tests before it's committed. Use conventional commit
   prefixes (`feat:`, `fix:`, `docs:`, `test:`, `chore:`).
 

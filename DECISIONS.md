@@ -281,3 +281,22 @@ not to a number we made up. PM-driven hours are unaffected, which covers both wo
 **Caveat.** This is still a Saans construction, not a CPCB number. Instant stays labelled as such.
 **Revisit if.** CPCB publishes a 1 h index, or the scorecard shows CAMS ozone is badly biased.
 
+## D-015 · How the Phase 2 rules decide
+*2026-10-18 · Accepted (thresholds are D-010 defaults, all in `config.yaml`)*
+
+| Rule | Choice | Rejected alternative | Why |
+|---|---|---|---|
+| Workout slot score | **Worst** forecast hour overlapping the slot | Mean of the slot | You breathe hardest while training; one bad hour is the exposure that matters |
+| Slot after it ended | Advise tomorrow's slots | Say nothing | An evening run of `saans run` should still answer "and tomorrow morning?" |
+| Windows | Open only in waking hours with instant ≤ 100; spike call at ≥ 200 | Open whenever outdoor < indoor | No indoor sensor in v1 (out of scope), so outdoor-only rules, stated as such |
+| Commute exposure | Sample each route point **at the time the car passes it**; score = mean, peak decides recirculation | Home-only NAQI at departure time | A 75-min drive crosses several hours and cells; departure time shifts *when* you reach Noida |
+| Departure precision | If all departures are within 10 NAQI points: "any time in the window" | Always name the minimum | The first live Monday preview picked 10:00 at ~184 vs ~187 at 10:30, which is noise. False precision erodes trust |
+| Recirculation wording | Whole way / "from X onward" / whole way if ≥ 60% bad / "around X" | List every bad point | The first preview said "around" 4 of 5 points; one switch point is something you can actually follow while driving |
+| Office days | Rank the week's remaining weekdays by the mean of best morning and best return scores | Track days already attended | No attendance data in v1; Saans says so instead of pretending |
+| Headlines | State the number and your threshold ("reaches 197, above your 150 limit") | Category words ("moderate") | NAQI "Moderate" spans 101–200, so "gym, air is moderate" read as a contradiction |
+| No data | `ok = False`, "no forecast", never a default | Assume last known value | A wrong "go outside" is worse than "check before you go" |
+
+**Known limits.** Route points share grid cells (3 cells for 5 points). The forecast model's
+known Delhi biases pass straight through to the advice. The scorecard (Phase 4) and station-based
+route values (2b) are the fixes.
+

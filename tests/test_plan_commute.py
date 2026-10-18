@@ -30,9 +30,9 @@ def test_picks_the_least_bad_departure_and_quantifies_the_saving():
     r = recommend_commute(route(home=bad_early, isbt=bad_early, ito=bad_early, dnd=bad_early, office=bad_early),
                           ROUTINE, THRESHOLDS, at(7))
     morning = r.reasons[0]
-    assert morning.startswith("Morning: leave 10:30 (route NAQI ~110")
+    assert morning.startswith("Morning: leave at 10:30 (route NAQI ~110")
     assert any("instead of 09:00 cuts route NAQI" in x for x in r.reasons)
-    assert "leave 10:30" in r.headline and r.headline.startswith("Commute (if you go in):")
+    assert "leave at 10:30" in r.headline and r.headline.startswith("Commute (if you go in):")
 
 
 def test_recirculation_calls():
@@ -61,7 +61,7 @@ def test_after_the_morning_window_only_the_return_is_advised():
 
 def test_after_the_evening_window_advice_is_for_tomorrow():
     r = recommend_commute(route(), ROUTINE, THRESHOLDS, at(19))
-    assert r.headline.startswith("Commute tomorrow (if you go in): any time 09:00–10:30")
+    assert r.headline.startswith("Commute tomorrow (if you go in): leave any time 09:00–10:30")
 
 
 def test_weekend():
@@ -82,12 +82,12 @@ def test_no_data():
 
 def test_mostly_bad_route_is_called_whole_way():
     dep = evaluate(route(home=150, isbt=150, ito=80, dnd=150, office=150), at(9), 75)
-    assert recirculation(dep, 100) == "recirculate the whole way (cleaner only near Ito)"
+    assert recirculation(dep, 100) == "recirculate the whole way, cleaner only near Ito"
 
 
 def test_flat_departures_are_not_given_false_precision():
     r = recommend_commute(route(), ROUTINE, THRESHOLDS, at(7))
-    assert r.headline.startswith("Commute (if you go in): any time 09:00–10:30 (~90")
+    assert r.headline.startswith("Commute (if you go in): leave any time 09:00–10:30 (~90")
     assert any("timing barely matters" in x for x in r.reasons)
 
 

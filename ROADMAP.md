@@ -56,25 +56,32 @@ Goal: from your first `saans run`, store everything we'll ever need. Minimal bri
 - `saans reparse` rebuilds the parsed tables from raw and gives identical results.
 
 ## Phase 2: The daily plan (recommendations)
-- Rules engine driven by thresholds in `config.yaml`. Every recommendation carries its *reason*
-  ("8–9 pm instant NAQI 180–210 → gym").
-  - **Workout:** compare the 8–9 am and 8–9 pm slots. Outdoors if instant NAQI stays ≤ 100 for the
-    whole hour, outdoors but light/short at 101–150, gym above 150.
-  - **Purifier / windows:** hours when windows can be opened (outdoor ≤ 100); purifier on otherwise;
-    a "close up before" time when a spike is coming.
-  - **Commute (on office days):** route NAQI for departures 09:00–11:00 → arrive by 11:00, and 16:30–18:30
-    for the return. Pick the least-bad window and say when to switch recirculation on
-    (default: the whole trip if route NAQI > 100), plus a reminder to let in fresh air about every
-    20–30 min to stop CO₂ building up in the cabin.
-  - **Office-day picker:** "best 3 office days this week" from the multi-day forecast. You go in
-    any 3 days a week, so this is a cheap, high-value suggestion.
-- Add the OpenAQ collector (station concentrations with history, which also backfills missed
-  days) and the WAQI collector.
-- **Push channel:** WhatsApp via Meta's Cloud API: a utility template carrying a 5-line summary (D-011).
+
+### 2a: Rules engine ✅ (2026-10-18)
+- Instant-NAQI ozone question settled first (D-014).
+- Rules in `saans/plan/` are pure functions over per-location Outlooks, with thresholds in
+  `config.yaml` and a reason behind every call (D-015):
+  - **Workout:** each slot is judged by its worst hour; outdoors ≤ 100, outdoors but easy and short
+    ≤ 150, gym above that. Picks the better slot; switches to tomorrow once today's slots have passed.
+  - **Purifier / windows:** open-window runs during waking hours (≤ 100), a "purifier on high from
+    HH:MM" call for spikes ≥ 200, and an overnight check to 07:00.
+  - **Commute (weekdays):** samples the route at the time the car passes each point, picks the
+    least-bad departure (or says "any time" when departures differ by less than 10 points), and says
+    where to recirculate, with a CO₂ reminder on long recirculated drives.
+  - **Office days:** ranks the week's remaining weekdays by forecast commute exposure. Days
+    beyond the ~5-day CAMS horizon show as "no forecast yet" rather than being guessed.
+- The brief opens with a 5-line summary (the future WhatsApp message), then the reasons.
+- Scenario tests cover clean, smog, mixed, past-slot, weekend and no-data cases.
+
+### 2b: Better inputs + push (needs your keys / Meta setup)
+- OpenAQ collector (station concentrations with history, which also backfills missed days) and the WAQI collector.
+- Route NAQI from CPCB stations along the route, not just the coarse model grid
+  (today's 5 route points fall in 3 grid cells).
+- **Push channel:** WhatsApp via Meta's Cloud API, sending the 5-line summary as a utility template (D-011).
 
 **Done when:** the brief answers "train outside? when to air out the house? when to leave and
-when to recirculate? which days to go in?", each with a reason, and scenario tests (clean day,
-smog day, mixed day, missing data) pass. The 5-line summary arrives on WhatsApp after `saans run`.
+when to recirculate? which days to go in?", each with a reason ✅, scenario tests pass ✅,
+and the 5-line summary arrives on WhatsApp after `saans run` (2b).
 
 ## Phase 3: Stubble-fire early warning (heuristic v1)
 Built before the scorecard because peak burning season (roughly late Oct to mid Nov) is now,
