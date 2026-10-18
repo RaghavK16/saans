@@ -47,7 +47,7 @@ data/ out/        gitignored: DB, raw archive, generated briefs
 ## Conventions
 - Store timestamps as **UTC ISO-8601** and display them in **Asia/Kolkata**. Every forecast row
   has `issued_at` and `valid_at`.
-- One source = one module with `fetch(ctx) -> list[RawRecord]` and `parse(raw) -> rows`. A source
+- One source = one module with `collect(ctx) -> list[RawRecord]` and a pure `parse(raw, body) -> rows`. A source
   failing or missing its key logs and is skipped; it must never break the run.
 - Units: µg/m³ for everything except CO in mg/m³ (the NAQI convention). Convert at parse time and name
   the columns with units (`pm25_ugm3`).
