@@ -4,7 +4,9 @@ from __future__ import annotations
 
 import json
 import sqlite3
-from dataclasses import dataclass
+import time
+from collections.abc import Callable
+from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Any, ClassVar
 
@@ -26,6 +28,7 @@ class RunContext:
     fetcher: Fetcher
     now: datetime  # UTC, fixed for the whole run
     run_id: int | None = None
+    sleep: Callable[[float], None] = field(default=time.sleep)  # injectable for tests
 
 
 Row = dict[str, Any]
