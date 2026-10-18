@@ -11,47 +11,28 @@ from dataclasses import dataclass, field
 from datetime import date, datetime, timedelta, timezone
 from zoneinfo import ZoneInfo
 
-from saans import naqi
 from saans.config import Config, Point
-from saans.naqi import AqiResult, Pollutant
-
-COLUMNS = {
-    "pm10_ugm3": Pollutant.PM10,
-    "pm25_ugm3": Pollutant.PM25,
-    "no2_ugm3": Pollutant.NO2,
-    "so2_ugm3": Pollutant.SO2,
-    "o3_ugm3": Pollutant.O3,
-    "co_mgm3": Pollutant.CO,
-}
+from saans.plan.outlook import HourAir, Outlook, load_outlooks
 FIRST_HOUR, LAST_HOUR = 6, 23  # IST hours shown in the outlook
 STALE_RUN_GAP = timedelta(hours=26)
 
 
 @dataclass
-class HourOutlook:
-    local_time: datetime
-    instant: AqiResult
-    official: AqiResult
-
-
-@dataclass
 class LocationOutlook:
+    """Today's rows (FIRST_HOUR..LAST_HOUR local) for one location, as shown in the brief."""
+
     point: Point
     grid: tuple[float, float] | None
     issued_at: str | None
-    hours: list[HourOutlook] = field(default_factory=list)
+    hours: list[HourAir] = field(default_factory=list)
 
     @property
     def available(self) -> bool:
         return bool(self.hours)
 
-    def peak(self) -> HourOutlook | None:
+    def peak(self) -> HourAir | None:
         valid = [h for h in self.hours if h.instant.valid]
         return max(valid, key=lambda h: h.instant.value) if valid else None
-
-    def slot(self, start: str, end: str) -> list[HourOutlook]:
-        s, e = int(start[:2]), int(end[:2])
-        return [h for h in self.hours if s <= h.local_time.hour < e]
 
 
 @dataclass
@@ -90,36 +71,11 @@ def _parse_utc(s: str) -> datetime:
     return datetime.fromisoformat(s.replace("Z", "+00:00"))
 
 
-def _series(conn: sqlite3.Connection, location_key: str) -> tuple[dict, str | None, tuple | None]:
-    latest = conn.execute(
-        "SELECT MAX(raw_id) FROM aq_forecast_hourly WHERE location_key = ?", (location_key,)
-    ).fetchone()[0]
-    if latest is None:
-        return {}, None, None
-    rows = conn.execute(
-        "SELECT * FROM aq_forecast_hourly WHERE raw_id = ? AND location_key = ? ORDER BY valid_at",
-        (latest, location_key),
-    ).fetchall()
-    series = {
-        _parse_utc(r["valid_at"]): {p: r[c] for c, p in COLUMNS.items() if r[c] is not None}
-        for r in rows
-    }
-    return series, rows[0]["issued_at"], (rows[0]["lat"], rows[0]["lon"])
-
-
-def location_outlook(conn: sqlite3.Connection, point: Point, day: date, tz: ZoneInfo) -> LocationOutlook:
-    """Hours of `day` (local) between FIRST_HOUR and LAST_HOUR, at the forecast's own timestamps.
-
-    Open-Meteo hours are UTC-aligned, which is HH:30 in IST (+05:30). We show them as they are
-    rather than interpolating to :00, so every number in the brief is one the provider published.
-    """
-    series, issued_at, grid = _series(conn, point.key)
-    out = LocationOutlook(point, grid, issued_at)
-    for at in sorted(series):
-        local = at.astimezone(tz)
-        if local.date() == day and FIRST_HOUR <= local.hour <= LAST_HOUR:
-            out.hours.append(HourOutlook(local, naqi.instant(series, at), naqi.official(series, at)))
-    return out
+def todays_rows(outlook: Outlook, day: date) -> LocationOutlook:
+    """Open-Meteo hours are UTC-aligned (HH:30 IST). We show them as published rather than
+    interpolating to :00, so every number in the brief is one the provider gave us."""
+    rows = [h for h in outlook.on(day) if FIRST_HOUR <= h.local_time.hour <= LAST_HOUR]
+    return LocationOutlook(outlook.point, outlook.grid, outlook.issued_at, rows)
 
 
 def haversine_km(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
@@ -198,7 +154,8 @@ def build_brief(conn: sqlite3.Connection, config: Config, now: datetime) -> Brie
     run_id = runs[0]["id"] if runs else None
     gap = (_parse_utc(runs[0]["started_at"]) - _parse_utc(runs[1]["started_at"])) if len(runs) == 2 else None
 
-    locations = [location_outlook(conn, config.locations[k], day, tz) for k in ("home", "office")]
+    outlooks = load_outlooks(conn, config)
+    locations = [todays_rows(outlooks[k], day) for k in ("home", "office")]
     grids = {loc.grid for loc in locations if loc.grid}
     bulletins = conn.execute(
         "SELECT COUNT(DISTINCT request_key) FROM raw_responses WHERE source='cpcb_bulletin' AND ok=1"
