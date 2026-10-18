@@ -8,6 +8,23 @@ Forecast hours are UTC-aligned, so they fall at :30 IST._
 > ⚠ {{ note }}
 {% endfor %}
 
+## Today's plan
+{% if b.plan %}
+{% for line in b.plan.summary_lines %}
+- {{ line }}
+{% endfor %}
+{% for r in b.plan.recommendations if r.reasons %}
+
+**{{ r.topic | topic_title }}**{% if not r.ok %} _(not enough data)_{% endif %}
+
+{% for reason in r.reasons %}
+- {{ reason }}
+{% endfor %}
+{% endfor %}
+{% else %}
+_No forecast yet, so no plan. Run `saans run`._
+{% endif %}
+
 ## Today's outlook
 {% for loc in b.locations %}
 ### {{ loc.point.name }}
@@ -53,11 +70,9 @@ No detections in the last 24 h.
 _Raw counts only. The early-warning heuristic (fires × wind × trapping) arrives in Phase 3._
 {% endif %}
 
-## Coming in Phase 2
-- Workout call for {{ b.routine.get('workout_slots', []) | join(' or ') }}: outdoors or gym
-- When to run the purifier and when windows can open
-- Commute: least-bad departure in {{ b.routine.get('depart_home_window', '') }} / {{ b.routine.get('depart_office_window', '') }}, and when to recirculate
-- Best {{ b.routine.get('office_days_per_week', 3) }} office days this week
+## Coming next
+- Stubble-smoke early warning 24–48 h ahead (Phase 3)
+- Forecast scorecard: who predicts Delhi's AQI best (Phase 4)
 
 ## Data health
 | Source | This run | Last successful fetch (IST) |

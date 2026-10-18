@@ -17,6 +17,13 @@ from saans.plan.rules import Recommendation, window_on
 
 STEP = timedelta(minutes=30)
 CO2_TIP_AFTER_MIN = 30
+MEANINGFUL_DIFF = 10      # route-NAQI gap below which departure times count as equivalent
+MOSTLY_BAD = 0.6          # share of route above the threshold that means "the whole way"
+
+
+def short_name(name: str) -> str:
+    """'Model Town, Delhi' -> 'Model Town'; 'Noida (sector …)' -> 'Noida'."""
+    return name.split(",")[0].split("(")[0].strip()
 
 
 @dataclass
@@ -54,7 +61,7 @@ def evaluate(route: list[Outlook], leave: datetime, minutes: int) -> Departure:
     samples = []
     for i, o in enumerate(route):
         t = leave + timedelta(minutes=minutes * i / max(n - 1, 1))
-        samples.append(Sample(o.point.name, t, o.covering(t)))
+        samples.append(Sample(short_name(o.point.name), t, o.covering(t)))
     return Departure(leave, samples)
 
 
@@ -84,8 +91,11 @@ def recirculation(dep: Departure, threshold: float) -> str:
     if not any(bad):
         return "fresh-air mode is fine"
     first = bad.index(True)
-    if all(bad[first:]):
+    if all(bad[first:]):  # one switch point is the easiest instruction to follow
         return f"recirculate from {dep.samples[first].place} onward"
+    if sum(bad) / len(bad) >= MOSTLY_BAD:
+        clean = ", ".join(s.place for s, b in zip(dep.samples, bad) if not b)
+        return f"recirculate the whole way (cleaner only near {clean})"
     return "recirculate around " + ", ".join(s.place for s, b in zip(dep.samples, bad) if b)
 
 
@@ -100,8 +110,14 @@ def _leg(name: str, route: list[Outlook], day: date, spec: str, minutes: int, th
     recirc = recirculation(best, threshold)
     scored = [d for d in deps if d.score is not None]
     worst = max(scored, key=lambda d: d.score)
-    lines = [f"{name}: leave {best.leave:%H:%M} (route NAQI ~{best.score:.0f}, peak {best.peak} "
+    flat = worst.score - best.score < MEANINGFUL_DIFF
+    when = (f"any time {scored[0].leave:%H:%M}–{scored[-1].leave:%H:%M}" if flat and len(scored) > 1
+            else f"leave {best.leave:%H:%M}")
+    lines = [f"{name}: {when} (route NAQI ~{best.score:.0f}, peak {best.peak} "
              f"at {next(s.place for s in best.samples if s.value == best.peak)}); {recirc}"]
+    if flat and len(scored) > 1:
+        lines.append(f"{name}: departure times within {MEANINGFUL_DIFF} NAQI points of each other; "
+                     "timing barely matters")
     if worst.score - best.score >= 15:
         lines.append(f"{name}: leaving {best.leave:%H:%M} instead of {worst.leave:%H:%M} cuts route "
                      f"NAQI from ~{worst.score:.0f} to ~{best.score:.0f}")
@@ -109,7 +125,7 @@ def _leg(name: str, route: list[Outlook], day: date, spec: str, minutes: int, th
     if recirc != "fresh-air mode is fine" and minutes > CO2_TIP_AFTER_MIN:
         lines.append(f"{name}: on recirculation for {minutes} min, let fresh air in for a minute "
                      "every 20–30 min (CO₂ builds up and makes you drowsy)")
-    summary = f"leave {best.leave:%H:%M} (~{best.score:.0f}, {recirc})"
+    summary = f"{when} (~{best.score:.0f}, {recirc})"
     return summary, lines
 
 

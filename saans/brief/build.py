@@ -12,6 +12,7 @@ from datetime import date, datetime, timedelta, timezone
 from zoneinfo import ZoneInfo
 
 from saans.config import Config, Point
+from saans.plan import Plan, make_plan
 from saans.plan.outlook import HourAir, Outlook, load_outlooks
 FIRST_HOUR, LAST_HOUR = 6, 23  # IST hours shown in the outlook
 STALE_RUN_GAP = timedelta(hours=26)
@@ -64,6 +65,7 @@ class Brief:
     bulletins_stored: int
     same_grid_cell: bool
     routine: dict
+    plan: Plan | None = None
     notes: list[str] = field(default_factory=list)
 
 
@@ -172,6 +174,7 @@ def build_brief(conn: sqlite3.Connection, config: Config, now: datetime) -> Brie
         bulletins_stored=bulletins,
         same_grid_cell=len(grids) == 1,
         routine=config.routine,
+        plan=make_plan(outlooks, config, local_now) if outlooks["home"].available else None,
     )
     if gap and gap > STALE_RUN_GAP:
         missed = gap.days

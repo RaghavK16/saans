@@ -49,19 +49,19 @@ def recommend_home_air(home: Outlook, thresholds: dict, now: datetime) -> Recomm
         # a run already under way starts "now", not at the top of its forecast hour
         spans = [fmt_window(max(r[0].local_time, now), r[-1].end) for r in open_runs]
         shown = " and ".join(spans[:2]) + (f" (+{len(spans) - 2} more)" if len(spans) > 2 else "")
-        headline = f"Windows: open {shown}; purifier on the rest of the time"
+        headline = f"Windows: open {shown}; purifier on otherwise"
         for r, label in zip(open_runs, spans):
             reasons.append(f"{label}: instant NAQI {value_range(r)}, at or below {open_max:.0f}")
     else:
         b = best(waking) or best(horizon)
-        headline = "Windows: keep closed today; purifier on"
+        headline = "Windows: keep closed; purifier on"
         reasons.append(f"No waking hour at or below {open_max:.0f}; the cleanest is "
                        f"{b.local_time:%H:%M} ({describe(b)})")
 
     spike = next((h for h in horizon if h.instant.value >= spike_at), None)
     if spike:
         peak = worst(h for h in horizon if h.local_time >= spike.local_time)
-        headline += f"; purifier on high from {spike.local_time:%H:%M}"
+        headline += f", on high from {spike.local_time:%H:%M}"
         reasons.append(f"Spike: instant NAQI reaches {spike.instant.value} at {spike.local_time:%H:%M}, "
                        f"peaking at {peak.instant.value} ({peak.local_time:%H:%M}, "
                        f"{'/'.join(peak.instant.prominent)}). Close windows before then.")

@@ -56,12 +56,12 @@ def test_co2_tip_only_when_recirculating():
 def test_after_the_morning_window_only_the_return_is_advised():
     r = recommend_commute(route(), ROUTINE, THRESHOLDS, at(12))
     assert r.reasons[0] == "Morning: window 09:00-10:30 has passed"
-    assert r.headline.startswith("Commute (if you go in): return leave")
+    assert r.headline.startswith("Commute (if you go in): return any time 16:30–18:30")
 
 
 def test_after_the_evening_window_advice_is_for_tomorrow():
     r = recommend_commute(route(), ROUTINE, THRESHOLDS, at(19))
-    assert r.headline.startswith("Commute tomorrow (if you go in): leave 09:00")
+    assert r.headline.startswith("Commute tomorrow (if you go in): any time 09:00–10:30")
 
 
 def test_weekend():
@@ -78,3 +78,20 @@ def test_no_data():
     empty = [outlook(k, default=None) for k in ("home", "isbt", "ito", "dnd", "office")]
     r = recommend_commute(empty, ROUTINE, THRESHOLDS, at(7))
     assert not r.ok and "no forecast" in r.headline
+
+
+def test_mostly_bad_route_is_called_whole_way():
+    dep = evaluate(route(home=150, isbt=150, ito=80, dnd=150, office=150), at(9), 75)
+    assert recirculation(dep, 100) == "recirculate the whole way (cleaner only near Ito)"
+
+
+def test_flat_departures_are_not_given_false_precision():
+    r = recommend_commute(route(), ROUTINE, THRESHOLDS, at(7))
+    assert r.headline.startswith("Commute (if you go in): any time 09:00–10:30 (~90")
+    assert any("timing barely matters" in x for x in r.reasons)
+
+
+def test_short_names():
+    from saans.plan.commute import short_name
+    assert short_name("Model Town, Delhi") == "Model Town"
+    assert short_name("Noida (sector not set — edit me)") == "Noida"

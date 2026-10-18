@@ -29,6 +29,12 @@
   .c-poor { background:#ff9a3c; } .c-very-poor { background:#f2453d; color:#fff; } .c-severe { background:#9b1c1c; color:#fff; }
   .c-none { background: var(--line); }
   ul { padding-left: 20px; }
+  ul.summary { list-style: none; padding: 12px 16px; background: var(--card); border: 1px solid var(--line); border-radius: 10px; }
+  ul.summary li { padding: 3px 0; }
+  ul.summary li:first-child { font-weight: 600; }
+  details.why { margin: 4px 0; }
+  details.why summary { cursor: pointer; color: var(--muted); font-size: 14px; }
+  details.why ul { margin: 4px 0 8px; font-size: 14px; }
 </style>
 </head>
 <body>
@@ -38,6 +44,15 @@
 <b>Instant</b> = one hour's forecast concentrations, O₃/CO scaled to their 1-hour limits (for timing; not official) ·
 <b>24 h</b> = CPCB-style rolling average (comparable with the official bulletin) · forecast hours are UTC-aligned, so they fall at :30 IST</p>
 {% for note in b.notes %}<div class="note">{{ note }}</div>{% endfor %}
+
+<h2>Today's plan</h2>
+{% if b.plan %}
+<ul class="summary">{% for line in b.plan.summary_lines %}<li>{{ line }}</li>{% endfor %}</ul>
+{% for r in b.plan.recommendations if r.reasons %}
+<details class="why"><summary>{{ r.topic | topic_title }}: why{% if not r.ok %} (not enough data){% endif %}</summary>
+<ul>{% for reason in r.reasons %}<li>{{ reason }}</li>{% endfor %}</ul></details>
+{% endfor %}
+{% else %}<p class="muted">No forecast yet, so no plan. Run <code>saans run</code>.</p>{% endif %}
 
 <h2>Today's outlook</h2>
 {% for loc in b.locations %}
@@ -81,12 +96,10 @@ Open-Meteo / CAMS, fetched {{ loc.issued_at | local_time }} IST · grid {{ '%.2f
 <p class="muted">Raw counts only. The early-warning heuristic (fires × wind × trapping) arrives in Phase 3.</p>
 {% endif %}
 
-<h2>Coming in Phase 2</h2>
+<h2>Coming next</h2>
 <ul>
-<li>Workout call for {{ b.routine.get('workout_slots', []) | join(' or ') }}: outdoors or gym</li>
-<li>When to run the purifier and when windows can open</li>
-<li>Commute: least-bad departure and when to recirculate</li>
-<li>Best {{ b.routine.get('office_days_per_week', 3) }} office days this week</li>
+<li>Stubble-smoke early warning 24–48 h ahead (Phase 3)</li>
+<li>Forecast scorecard: who predicts Delhi's AQI best (Phase 4)</li>
 </ul>
 
 <h2>Data health</h2>

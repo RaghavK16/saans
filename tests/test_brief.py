@@ -77,16 +77,17 @@ def test_rendered_brief_labels_instant_vs_official_and_credits_sources(config, f
         assert "Instant" in text and "24 h" in text and "not" in text and "official" in text
         assert "Open-Meteo (CC BY 4.0)" in text
     assert "| 07:30 |" in md and "| 08:30 |" in md
-    assert "| workout · leave home |" in md  # 08:30 home row overlaps both windows
-    assert md.count("leave office") == 2      # 16:30 and 17:30, office table only
+    # fixture day is a Sunday: workout rows are labelled, commute rows are not
+    assert "| 07:30 |" in md and "leave home" not in md and "leave office" not in md
+    assert md.count("| workout |") == 4  # 07:30, 08:30, 19:30, 20:30 on the home table
     assert "<script" not in html  # static, no JS
 
 
 def test_slot_labels_overlap_rules():
     routine = {"workout_slots": ["08:00-09:00", "20:00-21:00"],
                "depart_home_window": "09:00-10:30", "depart_office_window": "16:30-18:30"}
-    def at(h, m=30):
-        return datetime(2026, 10, 18, h, m, tzinfo=IST)
+    def at(h, m=30, d=19):  # 19 Oct 2026 is a Monday
+        return datetime(2026, 10, d, h, m, tzinfo=IST)
 
     assert slot_label(at(7), routine, "home") == "workout"         # 07:30-08:30 overlaps 08-09
     assert slot_label(at(8), routine, "home") == "workout · leave home"
@@ -96,3 +97,26 @@ def test_slot_labels_overlap_rules():
     assert slot_label(at(18), routine, "office") == ""             # window ends 18:30
     assert slot_label(at(16), routine, "home") == ""               # office plans stay off the home table
     assert slot_label(at(8), routine, "office") == ""
+    assert slot_label(at(8, d=18), routine, "home") == "workout"     # Sunday: no commute
+    assert slot_label(at(16, d=18), routine, "office") == ""
+
+
+def test_plan_is_built_from_stored_forecasts_and_rendered_first(config, fixtures_dir):
+    ctx = _collected(config, fixtures_dir)
+    b = build_brief(ctx.conn, config, NOW)  # Sunday 17:26 IST
+    lines = b.plan.summary_lines
+    assert len(lines) == 5
+    assert lines[0].startswith("Air (home), rest of today: instant NAQI")
+    assert lines[1].startswith("Workout: ")            # 20-21 slot still ahead
+    assert lines[3] == "Commute: none (weekend)"
+    assert lines[4].startswith("Office days (next week): ")
+    md = render(b, IST)["md"]
+    assert md.index("## Today's plan") < md.index("## Today's outlook")
+    assert "**Purifier & windows**" in md
+
+
+def test_no_plan_without_a_forecast(config):
+    conn = db.connect(config.db_path)
+    b = build_brief(conn, config, NOW)
+    assert b.plan is None
+    assert "no plan" in render(b, IST)["html"]

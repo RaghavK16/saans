@@ -14,6 +14,14 @@ from saans.brief.build import Brief, build_brief
 from saans.config import Config
 
 
+TOPIC_TITLES = {
+    "workout": "Workout",
+    "home_air": "Purifier & windows",
+    "commute": "Commute",
+    "office_days": "Office days",
+}
+
+
 def _in_window(t: datetime, window: str) -> bool:
     start, end = window.split("-")
     minutes = t.hour * 60 + t.minute
@@ -25,12 +33,13 @@ def _in_window(t: datetime, window: str) -> bool:
 def slot_label(t: datetime, routine: dict, location_key: str) -> str:
     """Which of your plans fall in this hour, for the table of `location_key`."""
     labels = []
+    weekday = t.weekday() < 5  # commute labels on office days (Mon–Fri) only
     if location_key == "home":
         if any(_in_window(t, w) for w in routine.get("workout_slots", [])):
             labels.append("workout")
-        if routine.get("depart_home_window") and _in_window(t, routine["depart_home_window"]):
+        if weekday and routine.get("depart_home_window") and _in_window(t, routine["depart_home_window"]):
             labels.append("leave home")
-    if location_key == "office":
+    if location_key == "office" and weekday:
         if routine.get("depart_office_window") and _in_window(t, routine["depart_office_window"]):
             labels.append("leave office")
     return " · ".join(labels)
@@ -57,6 +66,7 @@ def _environment(tz: ZoneInfo) -> Environment:
         .astimezone(tz).strftime("%d %b %H:%M"),
         cat_class=lambda c: "c-" + (c or "none").lower().replace(" ", "-"),
         category_of=lambda v: naqi.category(v) if v is not None else None,
+        topic_title=lambda topic: TOPIC_TITLES.get(topic, topic),
     )
     return env
 

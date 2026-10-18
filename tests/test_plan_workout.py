@@ -26,7 +26,8 @@ def test_slot_is_judged_by_its_worst_hour():
 
 def test_smog_day_sends_you_to_the_gym_and_names_the_less_bad_slot():
     r = rec({7: 310, 8: 290, 19: 240, 20: 260})
-    assert r.headline == "Workout: gym, outdoor air is poor in your slots (least bad 20:00–21:00, NAQI up to 260)"
+    assert r.headline == ("Workout: gym; outdoor NAQI reaches 260 (least bad 20:00–21:00), "
+                          "above your 150 limit for training outside")
     assert all("→ gym" in line for line in r.reasons)
 
 
@@ -37,7 +38,7 @@ def test_ties_go_to_the_earlier_slot():
 def test_past_slots_are_skipped():
     r = rec({7: 50, 8: 50, 19: 180, 20: 190}, now=at(12))
     assert r.reasons[0] == "08:00–09:00: already passed"
-    assert r.headline.startswith("Workout: gym") and "(20:00–21:00, NAQI up to 190)" in r.headline
+    assert r.headline.startswith("Workout: gym; outdoor NAQI reaches 190 (20:00–21:00)")
 
 
 def test_after_last_slot_the_advice_is_for_tomorrow():

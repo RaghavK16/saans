@@ -10,7 +10,7 @@ def rec(values, now=at(6), default=150, days=2):
 
 def test_clean_afternoon_opens_windows_for_that_run():
     r = rec({13: 90, 14: 80, 15: 95})
-    assert r.headline == "Windows: open 13:30–16:30; purifier on the rest of the time"
+    assert r.headline == "Windows: open 13:30–16:30; purifier on otherwise"
     assert r.reasons[0] == "13:30–16:30: instant NAQI 80–95, at or below 100"
 
 
@@ -21,13 +21,13 @@ def test_two_runs_are_listed_and_more_are_counted():
 
 def test_smog_day_keeps_windows_closed_and_names_the_cleanest_hour():
     r = rec({13: 120}, default=180)
-    assert r.headline == "Windows: keep closed today; purifier on"
+    assert r.headline == "Windows: keep closed; purifier on"
     assert "the cleanest is 13:30 (120 Moderate, PM2.5)" in r.reasons[0]
 
 
 def test_evening_spike_triggers_close_up_call():
     r = rec({21: 210, 22: 260, 23: 280}, default=140)
-    assert r.headline.endswith("; purifier on high from 21:30")
+    assert r.headline == "Windows: keep closed; purifier on, on high from 21:30"
     spike = next(x for x in r.reasons if x.startswith("Spike"))
     assert "reaches 210 at 21:30, peaking at 280 (23:30" in spike
 

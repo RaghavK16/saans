@@ -13,7 +13,6 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 
-from saans.naqi import category
 from saans.plan.outlook import HourAir, Outlook, worst
 from saans.plan.rules import Recommendation, describe, fmt_window, value_range, window_on
 
@@ -89,9 +88,8 @@ def recommend_workout(home: Outlook, routine: dict, thresholds: dict, now: datet
     elif best.verdict == LIGHT:
         headline = f"{title}: outdoors but easy and short, {best.label} (NAQI up to {worst_val})"
     else:
-        headline = f"{title}: gym, outdoor air is {category(worst_val).lower()} in your slots"
-        if len(open_calls) > 1:
-            headline += f" (least bad {best.label}, NAQI up to {worst_val})"
-        else:
-            headline += f" ({best.label}, NAQI up to {worst_val})"
+        limit = thresholds.get("outdoor_light_max", 150)
+        where = f"least bad {best.label}" if len(open_calls) > 1 else best.label
+        headline = (f"{title}: gym; outdoor NAQI reaches {worst_val} ({where}), "
+                    f"above your {limit:.0f} limit for training outside")
     return Recommendation("workout", headline, reasons)
