@@ -55,6 +55,7 @@ routine:
   office_hours: "11:00-17:00"
   depart_home_window: "09:00-10:30"
   depart_office_window: "16:30-18:30"
+  commute_minutes: 75        # Model Town → Noida by car, typical
 
 # Instant-NAQI thresholds (D-010). Phase 2 rules read these.
 thresholds:
@@ -62,6 +63,7 @@ thresholds:
   outdoor_light_max: 150
   windows_open_max: 100
   recirculate_above: 100
+  spike_alert_above: 200     # "close up, purifier on high" call
 
 sources:
   open_meteo_aq:
