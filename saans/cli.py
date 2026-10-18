@@ -31,6 +31,8 @@ def main(argv: list[str] | None = None) -> int:
         level=logging.DEBUG if args.verbose else logging.INFO,
         format="%(levelname)s %(name)s: %(message)s",
     )
+    if not args.verbose:  # one line per request is noise; our own per-source summary suffices
+        logging.getLogger("httpx").setLevel(logging.WARNING)
     try:
         config = load_config(args.config)
     except ConfigError as e:

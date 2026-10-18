@@ -9,7 +9,7 @@ any day you skip loses that day's forecasts and station snapshot for good.
 
 ---
 
-## Phase 0: Foundations ✅ (this commit)
+## Phase 0: Foundations ✅
 - DATA_SOURCES.md (every source tested), ROADMAP.md, CLAUDE.md, DECISIONS.md, `.gitignore`.
 
 **Done when:** these docs are committed and you've requested the two Phase 1 keys
@@ -17,7 +17,12 @@ any day you skip loses that day's forecasts and station snapshot for good.
 
 ---
 
-## Phase 1: Collector + brief scaffold (start collecting history)
+## Phase 1: Collector + brief scaffold (start collecting history) ✅ (keyed sources pending live check)
+
+**Status 2026-10-18:** the first live run collected Open-Meteo AQ + weather, FIRMS (keyless,
+D-013) and 30 CPCB bulletins, and wrote the brief. 185 offline tests pass, and `reparse` reproduces
+the tables. **Still open:** a live run with `DATAGOVIN_API_KEY` and `FIRMS_MAP_KEY`, then
+re-recording their fixtures from real keyed responses.
 Goal: from your first `saans run`, store everything we'll ever need. Minimal brief.
 
 1. Project skeleton: `pyproject.toml`, `saans/` package, `venv`, `config.yaml` (locations,
