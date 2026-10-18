@@ -1,7 +1,7 @@
 # Saans · {{ b.day.strftime('%a %d %b %Y') }}
 
 _Generated {{ b.generated_at_local.strftime('%H:%M') }} IST. All numbers use CPCB's NAQI.
-**Instant** = one hour's forecast concentrations (for timing decisions; not an official number).
+**Instant** = one hour's forecast concentrations, O₃/CO scaled to their 1-hour limits (for timing decisions; not an official number).
 **24 h** = CPCB-style rolling average (comparable with the official bulletin).
 Forecast hours are UTC-aligned, so they fall at :30 IST._
 {% for note in b.notes %}

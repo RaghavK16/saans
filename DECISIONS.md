@@ -35,7 +35,7 @@ Instant NAQI for timing decisions (workout, windows, commute), always labelled "
 **Why.** Each question needs a different number. Labelling them stops the brief from appearing
 to contradict the CPCB bulletin.
 **Revisit if.** The user finds two numbers confusing in practice.
-**Watch (2026-10-18, first real data).** Instant NAQI compares *one hour* of O₃ against breakpoints
+**Watch (2026-10-18, first real data; resolved by D-014).** Instant NAQI compares *one hour* of O₃ against breakpoints
 built for *8 h* averages. On the first forecast, midday ozone pushed instant NAQI to "Poor"
 (224–239) while the 24 h value was ~116. Before Phase 2 rules rely on instant NAQI, decide whether
 O₃/CO should use their 8 h rolling mean even in instant mode. CAMS is also known to overestimate
@@ -252,4 +252,32 @@ re-fetching from the last successful day in chunks of 5 days or fewer.
 season itself. Manual runs (D-003) can miss up to 7 days with no loss. The key still matters for
 history (the 2025 backtest in Phase 3).
 **Cost.** About 1.5 MB of raw data per run when no key is set (whole-region files). Acceptable.
+
+## D-014 · Instant NAQI: scale one-hour O₃ and CO by India's own 1 h / 8 h limits
+*2026-10-18 · Accepted · Resolves the "Watch" note on D-002*
+
+**Context.** NAQI's O₃ and CO breakpoints are for 8 h averages. Instant mode (D-002) feeds them
+one hour's concentration, which overstates afternoon ozone. India's NAAQS (2009) sets both limits
+for these two pollutants: O₃ 100 µg/m³ (8 h) and 180 µg/m³ (1 h); CO 2 mg/m³ (8 h) and 4 mg/m³ (1 h).
+**Options, measured on the 2026-10-18 forecast for home (instant NAQI):**
+
+| IST | O₃ µg/m³ | (a) raw 1 h | (b) 8 h rolling | (c) NAAQS-scaled | official 24 h |
+|---|---:|---:|---:|---:|---:|
+| 12:30 | 178 | 224 O₃ | 96 O₃ | 99 O₃ | 116 |
+| 13:30 | 184 | 239 O₃ | 123 O₃ | 102 O₃ | 123 |
+| 16:30 | 134 | 150 O₃ | **181 O₃** | 124 PM10 | 181 |
+| 17:30 | 108 | 128 PM10 | **182 O₃** | 128 PM10 | 182 |
+| 20:30 | 53 | 197 PM10 | 197 PM10 | 197 PM10 | 132 |
+
+- (a) Raw 1 h against 8 h breakpoints: midday reads "Poor" from ozone alone.
+- (b) 8 h rolling mean even in instant mode: lags by hours. It flags the evening drive home
+  (16:30–17:30) as ozone-driven *after* ozone has fallen. Wrong exactly when a decision is due.
+- (c) Multiply one-hour O₃ by 100/180 and CO by 2/4 before the 8 h breakpoints. An hour at the
+  legal 1 h limit then reads like the 8 h limit (sub-index 100).
+- Rejected: US EPA 1 h ozone breakpoints (breaks D-001), and dropping O₃ from instant mode
+  (hides a real midday exposure).
+**Decision.** (c). It reacts to the current hour, and it's anchored to an official Indian standard,
+not to a number we made up. PM-driven hours are unaffected, which covers both workout slots today.
+**Caveat.** This is still a Saans construction, not a CPCB number. Instant stays labelled as such.
+**Revisit if.** CPCB publishes a 1 h index, or the scorecard shows CAMS ozone is badly biased.
 

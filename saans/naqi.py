@@ -15,6 +15,9 @@ Choices this module makes that the CPCB table leaves open (all documented in D-0
 - "Official" averaging: 24 h mean (>= 16 hourly values) for PM10/PM2.5/NO2/SO2/NH3/Pb,
   8 h mean (>= 6 values) for CO/O3. "Instant": NAQI breakpoints applied to a single hour,
   which is NOT an official number and must always be labelled as such (D-002).
+- Instant mode scales one-hour O3 and CO by the ratio of their 8 h to 1 h NAAQS limits
+  (O3 100/180, CO 2/4; NAAQS 2009) before using the 8 h breakpoints, so an hour at the legal
+  1 h limit reads like the 8 h limit (D-014).
 """
 
 from __future__ import annotations
@@ -58,6 +61,9 @@ DECIMALS = {p: (1 if p in (Pollutant.CO, Pollutant.PB) else 0) for p in Pollutan
 AVERAGING_HOURS = {p: (8 if p in (Pollutant.CO, Pollutant.O3) else 24) for p in Pollutant}
 MIN_HOURS = {24: 16, 8: 6}
 PARTICULATES = (Pollutant.PM25, Pollutant.PM10)
+
+# NAAQS 2009: 8 h limit / 1 h limit for pollutants whose NAQI breakpoints are 8 h averages.
+INSTANT_SCALE = {Pollutant.O3: 100 / 180, Pollutant.CO: 2 / 4}
 
 
 def _round_half_up(x: float, decimals: int) -> float:
@@ -138,6 +144,13 @@ def official(series: HourlySeries, at: datetime) -> AqiResult:
     return overall(official_concentrations(series, at))
 
 
+def instant_concentrations(hour: Mapping[Pollutant, float | None]) -> dict[Pollutant, float | None]:
+    return {
+        p: (c * INSTANT_SCALE[p] if c is not None and p in INSTANT_SCALE else c)
+        for p, c in hour.items()
+    }
+
+
 def instant(series: HourlySeries, at: datetime) -> AqiResult:
     """Breakpoints applied to one hour's concentrations. Not official: label it 'instant'."""
-    return overall(series.get(at, {}))
+    return overall(instant_concentrations(series.get(at, {})))

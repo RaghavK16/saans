@@ -154,3 +154,15 @@ def test_instant_reads_a_single_hour():
     assert naqi.instant(series, T0 + timedelta(hours=2)).value == 400
     assert naqi.official(series, T0 + timedelta(hours=2)).valid is False  # not enough hours
     assert naqi.instant(series, T0 + timedelta(hours=99)).valid is False
+
+
+def test_instant_scales_one_hour_ozone_and_co_by_naaqs_ratio():
+    """D-014: an hour at the 1 h NAAQS limit reads like the 8 h limit (sub-index 100)."""
+    at = T0
+    hour = {P.PM25: 10, P.PM10: 20, P.O3: 180, P.CO: 4.0}
+    r = naqi.instant({at: hour}, at)
+    assert r.sub_indices[P.O3] == 100 and r.sub_indices[P.CO] == 100
+    # unscaled pollutants are untouched
+    assert r.sub_indices[P.PM25] == sub_index(P.PM25, 10)
+    # the official path never scales
+    assert naqi.overall(hour).sub_indices[P.O3] == sub_index(P.O3, 180) == 229

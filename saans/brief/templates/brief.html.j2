@@ -35,7 +35,7 @@
 <main>
 <h1>Saans · {{ b.day.strftime('%a %d %b %Y') }}</h1>
 <p class="muted">Generated {{ b.generated_at_local.strftime('%H:%M') }} IST · CPCB NAQI ·
-<b>Instant</b> = one hour's forecast concentrations (for timing; not official) ·
+<b>Instant</b> = one hour's forecast concentrations, O₃/CO scaled to their 1-hour limits (for timing; not official) ·
 <b>24 h</b> = CPCB-style rolling average (comparable with the official bulletin) · forecast hours are UTC-aligned, so they fall at :30 IST</p>
 {% for note in b.notes %}<div class="note">{{ note }}</div>{% endfor %}
 
